@@ -18,6 +18,8 @@ class config:
     NUM_PER_BATCH = env.int("NUM_PER_BATCH", 5000)
 
     DROP_OLD = env.bool("DROP_OLD", True)
+    SKIP_DATA_SOURCE_VALIDATE = env.bool("SKIP_DATA_SOURCE_VALIDATE", False)
+    DOWNLOAD_DATASET_IF_NOT_EXISTS = env.bool("DOWNLOAD_DATASET_IF_NOT_EXISTS", True)
     USE_SHUFFLED_DATA = env.bool("USE_SHUFFLED_DATA", True)
     NUM_CONCURRENCY = [1, 5, 10, 15, 20, 25, 30, 35]
 

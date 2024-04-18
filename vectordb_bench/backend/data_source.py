@@ -55,6 +55,8 @@ class AliyunOSSReader(DatasetReader):
         self.bucket = oss2.Bucket(oss2.AnonymousAuth(), self.remote_root, "benchmark", True)
 
     def validate_file(self, remote: pathlib.Path, local: pathlib.Path) -> bool:
+        if config.SKIP_DATA_SOURCE_VALIDATE:
+            return True
         info = self.bucket.get_object_meta(remote.as_posix())
 
         # check size equal
@@ -84,12 +86,17 @@ class AliyunOSSReader(DatasetReader):
         if len(downloads) == 0:
             return
 
-        log.info(f"Start to downloading files, total count: {len(downloads)}")
-        for remote_file, local_file in tqdm(downloads):
-            log.debug(f"downloading file {remote_file} to {local_file}")
-            self.bucket.get_object_to_file(remote_file.as_posix(), local_file.absolute())
+        if config.DOWNLOAD_DATASET_IF_NOT_EXISTS:
+            log.info(f"Start to downloading files, total count: {len(downloads)}")
+            for remote_file, local_file in tqdm(downloads):
+                log.info(f"downloading file {remote_file} to {local_file}")
+                self.bucket.get_object_to_file(remote_file.as_posix(), local_file.absolute())
 
-        log.info(f"Succeed to download all files, downloaded file count = {len(downloads)}")
+            log.info(f"Succeed to download all files, downloaded file count = {len(downloads)}")
+        else:
+            for remote_file, local_file in tqdm(downloads):
+                log.info(f"【Please first downloading file】 {remote_file}, and put it to {local_file}")
+            raise ValueError('Local dataset not found')
 
 
 
@@ -132,15 +139,21 @@ class AwsS3Reader(DatasetReader):
         if len(downloads) == 0:
             return
 
-        log.info(f"Start to downloading files, total count: {len(downloads)}")
-        for s3_file in tqdm(downloads):
-            log.debug(f"downloading file {s3_file} to {local_ds_root}")
-            self.fs.download(s3_file, local_ds_root.as_posix())
+        if config.DOWNLOAD_DATASET_IF_NOT_EXISTS:
+            for s3_file in tqdm(downloads):
+                log.info(f"downloading file {s3_file} to {local_ds_root}")
+                self.fs.download(s3_file, local_ds_root.as_posix())
 
-        log.info(f"Succeed to download all files, downloaded file count = {len(downloads)}")
+            log.info(f"Succeed to download all files, downloaded file count = {len(downloads)}")
+        else:
+            for s3_file in tqdm(downloads):
+                log.info(f"【Please first downloading file】 {s3_file}, and put it to {local_ds_root}")
+            raise ValueError('Local dataset not found')
 
 
     def validate_file(self, remote: pathlib.Path, local: pathlib.Path) -> bool:
+        if config.SKIP_DATA_SOURCE_VALIDATE:
+            return True
         # info() uses ls() inside, maybe we only need to ls once
         info = self.fs.info(remote)
 
