@@ -1,12 +1,17 @@
 from pydantic import BaseModel, SecretStr
 from ..api import DBConfig, DBCaseConfig, MetricType, IndexType
+from vectordb_bench import config
 
 
 class MilvusConfig(DBConfig):
     uri: SecretStr = "http://localhost:19530"
+    user: SecretStr = config.MILVUS_USERNAME
+    password: SecretStr = config.MILVUS_PASSWORD
 
     def to_dict(self) -> dict:
-        return {"uri": self.uri.get_secret_value()}
+        return {"uri": self.uri.get_secret_value(),
+                "user": self.user.get_secret_value(),
+                "password": self.password.get_secret_value()}
 
 
 class MilvusIndexConfig(BaseModel):
