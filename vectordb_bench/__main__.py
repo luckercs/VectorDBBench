@@ -13,20 +13,38 @@ def main():
 
 
 def run_streamlit():
-    cmd = [
-        "streamlit",
-        "run",
-        f"{os.path.dirname(__file__)}/frontend/vdb_benchmark.py",
-        "--logger.level",
-        "info",
-        "--theme.base",
-        "light",
-        "--theme.primaryColor",
-        "#3670F2",
-        "--theme.secondaryBackgroundColor",
-        "#F0F2F6",
-    ]
-    log.debug(f"cmd: {cmd}")
+    cmd = []
+    if config.STREAMLIT_ADD_GATHERUSAGESTATS:
+        cmd = [
+            "streamlit",
+            "run",
+            f"{os.path.dirname(__file__)}/frontend/vdb_benchmark.py",
+            "--logger.level",
+            "info",
+            "--theme.base",
+            "light",
+            "--theme.primaryColor",
+            "#3670F2",
+            "--theme.secondaryBackgroundColor",
+            "#F0F2F6",
+            "--browser.gatherUsageStats",
+            "false"
+        ]
+    else:
+        cmd = [
+            "streamlit",
+            "run",
+            f"{os.path.dirname(__file__)}/frontend/vdb_benchmark.py",
+            "--logger.level",
+            "info",
+            "--theme.base",
+            "light",
+            "--theme.primaryColor",
+            "#3670F2",
+            "--theme.secondaryBackgroundColor",
+            "#F0F2F6",
+        ]
+    log.info(f"cmd: {cmd}")
     try:
         subprocess.run(cmd, check=True)
     except KeyboardInterrupt:
